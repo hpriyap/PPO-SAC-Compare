@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  ppo_sac_trainer:
+    build: .
+    image: ppo-sac-ros2:latest
+    container_name: ppo_sac_trainer
+    runtime: nvidia                    # NVIDIA container toolkit required
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - DISPLAY=${DISPLAY:-:0}
+      - ROS_DOMAIN_ID=0
+      - WANDB_API_KEY=${WANDB_API_KEY:-}   # optional: set in .env
+    volumes:
+      - ./ros2_ws:/workspace/ros2_ws       # your ROS2 packages
+      - ./rl_training:/workspace/rl_training  # training scripts
+      - ./logs:/workspace/logs             # tensorboard / reward curves
+      - /tmp/.X11-unix:/tmp/.X11-unix      # GUI passthrough (optional)
+    ports:
+      - "6006:6006"    # TensorBoard
+      - "8888:8888"    # Jupyter (optional)
+    ipc: host
+    network_mode: host
+    stdin_open: true
+    tty: true
+    command: bash
